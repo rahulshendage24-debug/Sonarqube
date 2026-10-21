@@ -17,7 +17,7 @@ pipeline{
         stage('push-to-Dockerhub'){
             steps{
                 sh '''
-                echo "dckr_pat_guzwngA3XpOpPG3PecHByopScL4" | docker login -u awsfaculty4 --password-stdin
+                echo "Docker-tokern" | docker login -u awsfaculty4 --password-stdin
                  docker push  awsfaculty4/flask-app:version1
                   '''
             }
