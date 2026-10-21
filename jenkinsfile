@@ -1,0 +1,45 @@
+pipeline{
+    agent any
+    
+    stages{
+        stage('code pull'){
+            steps{
+                git url: "https://github.com/awsfaculty4-pixel/flask-app-ecs.git" , branch: "main"
+            }
+        }
+        stage('bild-image'){
+            steps{
+               sh '''
+                 docker build -t awsfaculty4/flask-app:version1 .
+                 '''
+              }
+            }
+        stage('push-to-Dockerhub'){
+            steps{
+                sh '''
+                echo "dckr_pat_guzwngA3XpOpPG3PecHByopScL4" | docker login -u awsfaculty4 --password-stdin
+                 docker push  awsfaculty4/flask-app:version1
+                  '''
+            }
+        }
+        stage('delete-old-contianer'){
+            steps{
+                sh '''
+                    CONTAINER_ID=$(docker ps -aq --filter "publish=80")
+                   if [ -n "$CONTAINER_ID" ]; then
+                  echo "Found old container: $CONTAINER_ID. Stopping and removing..."
+                  docker stop $CONTAINER_ID || true
+                  docker rm $CONTAINER_ID || true
+            else
+                echo "No old container found running on port 80."
+            fi
+                '''
+            }
+        }
+        stage('deployment'){
+            steps{
+                sh "docker run -d -p 80:80 --name flask-app  awsfaculty4/flask-app:version1"
+            }
+        }
+    }
+}
